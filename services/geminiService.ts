@@ -1,35 +1,32 @@
-// Use type-only imports to prevent runtime execution on load.
-// This brings in the types for TypeScript without loading the actual JavaScript module.
-import type { GoogleGenAI, Type as GenAIType } from "@google/genai";
+// Fix: Changed from `import type` to a static import to adhere to the Gemini API coding guidelines.
+// This simplifies the module and removes the need for dynamic imports.
+import { GoogleGenAI, Type } from "@google/genai";
 
-// Module-level cache for the initialized client and the `Type` enum.
+// Module-level cache for the initialized client.
 // `undefined` is the initial state, `null` means initialization was attempted but failed or had no key.
 let ai: GoogleGenAI | null | undefined = undefined;
-let Type: typeof GenAIType | undefined;
 
-// The client initializer is now async due to the dynamic import.
-const getAiClient = async (): Promise<GoogleGenAI | null> => {
+// The client initializer, now synchronous.
+const getAiClient = (): GoogleGenAI | null => {
   // If we've already tried to initialize, return the cached instance.
   if (ai !== undefined) {
     return ai;
   }
 
-  // Safely access the API key in a way that works in all environments.
-  const API_KEY = typeof process !== 'undefined' && process.env ? process.env.API_KEY : undefined;
+  // Access the API key using Vite's syntax for environment variables.
+  // The user must set VITE_API_KEY in their Vercel environment.
+  const API_KEY = import.meta.env.VITE_API_KEY;
 
   if (API_KEY) {
     try {
-      // Dynamically import the module only when an API key is present.
-      // This is the key change to prevent the app from crashing on load.
-      const genAIModule = await import('@google/genai');
-      Type = genAIModule.Type;
-      ai = new genAIModule.GoogleGenAI({ apiKey: API_KEY });
+      // Initialize the GoogleGenAI client.
+      ai = new GoogleGenAI({ apiKey: API_KEY });
     } catch (error) {
       console.error("Failed to initialize GoogleGenAI:", error);
       ai = null; // Mark as initialized-but-failed
     }
   } else {
-    console.warn("API_KEY environment variable not set. Using mock Gemini service.");
+    console.warn("VITE_API_KEY environment variable not set. Using mock Gemini service.");
     ai = null; // Mark as initialized-and-no-key
   }
   return ai;
@@ -37,9 +34,10 @@ const getAiClient = async (): Promise<GoogleGenAI | null> => {
 
 
 export const fetchPhoneSpecs = async (phoneName: string): Promise<string> => {
-  const aiClient = await getAiClient();
-  // We also need to check if `Type` was successfully loaded.
-  if (!aiClient || !Type) {
+  // Fix: `getAiClient` is now synchronous.
+  const aiClient = getAiClient();
+  // Fix: The `Type` enum is now always available via static import, so no need to check for its existence.
+  if (!aiClient) {
     // Mock response for environments without an API key
     return new Promise((resolve) =>
       setTimeout(() => {
@@ -57,7 +55,6 @@ export const fetchPhoneSpecs = async (phoneName: string): Promise<string> => {
     );
   }
   
-  // Schema is defined here because `Type` is loaded dynamically.
   const specsSchema = {
       type: Type.OBJECT,
       properties: {
@@ -101,8 +98,10 @@ export interface GeneratedPhoneDetails {
 }
 
 export const generatePhoneDetails = async (phoneName: string): Promise<GeneratedPhoneDetails> => {
-    const aiClient = await getAiClient();
-    if (!aiClient || !Type) {
+    // Fix: `getAiClient` is now synchronous.
+    const aiClient = getAiClient();
+    // Fix: The `Type` enum is now always available via static import, so no need to check for its existence.
+    if (!aiClient) {
         // Mock response
         return new Promise((resolve) =>
             setTimeout(() => {
