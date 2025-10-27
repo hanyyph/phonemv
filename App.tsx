@@ -49,7 +49,7 @@ const App: React.FC = () => {
             <div className="flex items-center justify-between h-16">
               <div className="flex items-center">
                 <Smartphone className="h-8 w-8 text-indigo-500" />
-                <span className="ml-2 text-xl font-bold text-gray-900 dark:text-white">PhonePrice</span>
+                <span className="ml-2 text-xl font-bold text-gray-900 dark:text-white">phonemv</span>
               </div>
               <div className="flex items-center space-x-2 sm:space-x-4">
                 <button onClick={toggleTheme} className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-slate-800 transition-colors">
