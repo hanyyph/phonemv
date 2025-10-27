@@ -1,0 +1,5 @@
+{
+  "name": "Phone Price Comparator",
+  "description": "A web application to compare mobile phone prices from various shops. Admins can manage phones, shops, and prices, while users can search and compare to find the best deals.",
+  "requestFramePermissions": []
+}
